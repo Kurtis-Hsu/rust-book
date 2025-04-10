@@ -1,0 +1,32 @@
+name: Sync upstream repo
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨 2 点同步
+  workflow_dispatch:     # 手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set git config
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Add upstream & Fetch
+        run: |
+          git remote add upstream https://github.com/rust-lang/book.git
+          git fetch upstream
+
+      - name: Merge upstream changes
+        run: |
+          git merge upstream/main --allow-unrelated-histories -m "sync: merge upstream"
+
+      - name: Push changes
+        run: |
+          git push origin main
